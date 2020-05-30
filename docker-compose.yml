@@ -13,7 +13,6 @@ configs:
 services:
   admin:
     image: disab/admin
-    build: ./admin
     links:
       - database
     ports:
@@ -38,7 +37,6 @@ services:
 
   server:
     image: disab/server
-    build: ./server
     links:
       - database
     ports:
@@ -49,7 +47,7 @@ services:
       - webnet
 
   client:
-    build: ./client
+    image: disab/client
     tty: true
     stdin_open: true
     networks:
