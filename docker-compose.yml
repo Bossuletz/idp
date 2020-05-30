@@ -1,0 +1,32 @@
+version: '3.1'
+services:
+  admin:
+    image: disab/admin
+    build: ./admin
+    links:
+      - database
+    ports:
+      - 5001:5001
+    volumes:
+      - ./admin:/app
+
+  database:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: timetable
+    volumes:
+      - ./dbInit:/docker-entrypoint-initdb.d/:ro
+
+  server:
+    image: disab/server
+    build: ./server
+    links:
+      - database
+    ports:
+      - 5000:5000
+    volumes:
+      - ./server:/app
