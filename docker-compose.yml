@@ -1,4 +1,12 @@
-version: '3.1'
+version: '3.3'
+
+volumes:
+  prometheus: {}
+
+configs:
+  prom_conf:
+    file: ./prometheus/conf/prometheus.yml
+
 services:
   admin:
     image: disab/admin
@@ -30,3 +38,50 @@ services:
       - 5000:5000
     volumes:
       - ./server:/app
+        
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
+    ports:
+      - "9090:9090"
+    configs:
+      - source: prom_conf
+        target: /etc/prometheus/prometheus.yml
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+       
+  node:
+    image: prom/node-exporter:v0.18.0
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    networks:
+      - webnet
+
+  cadvisor:
+    image: google/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - webnet

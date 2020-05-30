@@ -11,8 +11,8 @@ COPY . /app
 RUN pip install Flask
 RUN pip install mysql-connector
 
-# Make port 6969 available to the world outside this container
-EXPOSE 6969
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
 
 # Run server.py when the container launches
 CMD ["python", "server.py"]
