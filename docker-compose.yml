@@ -3,6 +3,9 @@ version: '3.3'
 volumes:
   prometheus: {}
 
+networks:
+  webnet:
+
 configs:
   prom_conf:
     file: ./prometheus/conf/prometheus.yml
@@ -17,6 +20,8 @@ services:
       - 5001:5001
     volumes:
       - ./admin:/app
+    networks:
+      - webnet
 
   database:
     image: mysql
@@ -28,6 +33,8 @@ services:
       MYSQL_DATABASE: timetable
     volumes:
       - ./dbInit:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - webnet
 
   server:
     image: disab/server
@@ -38,6 +45,15 @@ services:
       - 5000:5000
     volumes:
       - ./server:/app
+    networks:
+      - webnet
+
+  client:
+    build: ./client
+    tty: true
+    stdin_open: true
+    networks:
+      - webnet
         
   prometheus:
     image: prom/prometheus
